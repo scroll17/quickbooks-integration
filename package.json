@@ -1,0 +1,19 @@
+{
+  "name": "quickbooks-integrate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "axios": "^0.22.0",
+    "body-parser": "^1.13.3",
+    "dotenv": "^10.0.0",
+    "ejs": "2.5.5",
+    "express": "^4.13.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
