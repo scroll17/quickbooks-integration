@@ -24,13 +24,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(require('./router'))
 
-app.listen(app.get('port'), function () {
+const server = app.listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
 
+// exit
 process.on('SIGINT', () => {
+    console.info('-- SIGINT signal received. --');
+
+    server.close(() => {
+        console.log('-- SERVER CLOSED --')
+    });
+
     db.writeSync();
-    console.log('-- DB saved --');
+    console.log('-- DB SAVED --');
 
     console.log('-- EXIT --')
     process.exit()
