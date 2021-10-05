@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios')
 const dotenv = require('dotenv');
+// db
+const db = require('../data/index.js')
 
 dotenv.config();
 
@@ -25,3 +27,11 @@ app.use(require('./router'))
 app.listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
+
+process.on('SIGINT', () => {
+    db.writeSync();
+    console.log('-- DB saved --');
+
+    console.log('-- EXIT --')
+    process.exit()
+})
