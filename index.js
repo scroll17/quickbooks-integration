@@ -20,9 +20,8 @@ app.set('views', 'views');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(require('./router/index'))
+
 app.listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
-
-const { setRoutes } = require('./routes')
-setRoutes(app);
