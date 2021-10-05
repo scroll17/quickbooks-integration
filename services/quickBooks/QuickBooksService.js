@@ -1,8 +1,0 @@
-/**
- *  Plan:
- *
- * */
-
-module.exports = {
-
-}
