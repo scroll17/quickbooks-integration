@@ -1,26 +1,26 @@
 // extended modules
 const express = require('express');
 const bodyParser = require('body-parser');
-const axios = require('axios')
+const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const path = require('path')
 // db
 const db = require('../data/index.js')
 
 dotenv.config();
 
 // constants
-const port = process.env.PORT
-const consumerKey = process.env.CONSUMER_KEY;
-const consumerSecret = process.env.CONSUMER_SECRET;
+const PORT = process.env.PORT
 
 // def app
 const app = express();
 
-app.set('port', port)
-app.set('views', 'views');
+app.set('port', PORT)
+app.set('views', path.join(__dirname, 'views'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser())
 
 app.use(require('./router'))
 

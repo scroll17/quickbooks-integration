@@ -4,14 +4,15 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "nodemon src/app.js"
   },
   "dependencies": {
-    "axios": "^0.22.0",
     "body-parser": "^1.13.3",
+    "cookie-parser": "^1.4.5",
     "dotenv": "^10.0.0",
     "ejs": "2.5.5",
-    "express": "^4.13.3"
+    "express": "^4.13.3",
+    "intuit-oauth": "^4.0.0"
   },
   "keywords": [],
   "author": "",
