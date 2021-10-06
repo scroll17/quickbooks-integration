@@ -24,6 +24,7 @@
  * */
 
 // external modules
+const _ = require('lodash')
 const dotenv = require('dotenv');
 const OAuthClient = require('intuit-oauth');
 
@@ -54,8 +55,76 @@ const QuickBooksService = (() => {
         return oauthClient;
     }
 
+    /**
+     *  @param {object} oauthClient
+     *  @param {object} options
+     * */
+    async function select(oauthClient, options) {
+        const selectStatement = buildSelectStatement(options);
+
+        return oauthClient.makeApiCall({
+            url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/query?query=${selectStatement}`,
+            method: 'GET'
+        })
+    }
+
+    /**
+     *  @param {string} options.from
+     *  @param {string[] | undefined} options.select
+     *  @param {object | undefined} options.where
+     *  @param {number | undefined} options.offset
+     *  @param {number | undefined} options.limit
+     *
+     *  @return string
+     * */
+    function buildSelectStatement(options) {
+        let result = `select `;
+
+        // select
+        if(!_.isEmpty(options.select)) {
+            result += options.select.join(',') + ' '
+        } else {
+            result += '*' + ' '
+        }
+
+        // from
+        result += `from ${options.from} `
+
+        // where
+        if(!_.isEmpty(options.where)) {
+            const statements = _.map(
+                Object.entries(options.where),
+                ([key, value]) => {
+                    if(_.isObject(value)) {
+                        return `${key} ${value.op} ${
+                            _.isBoolean(value.value) ? value.value : `'${value.value}'`
+                        }`
+                    }
+
+                    return `${key} = ${
+                        _.isBoolean(value) ? value : `'${value}'` 
+                    }`
+                }
+            )
+
+            result += 'where ' + statements.join(' AND ') + ' '
+        }
+
+        // offset
+        if(options.offset) {
+            result += `STARTPOSITION ${options.offset}` + ' '
+        }
+
+        // offset
+        if(options.limit) {
+            result += `MAXRESULTS ${options.limit}`
+        }
+
+
+        return result;
+    }
+
     return {
-        getClient,
         Auth: (() => {
             function buildAuthUri(oauthClient) {
                 return oauthClient.authorizeUri({
@@ -72,6 +141,21 @@ const QuickBooksService = (() => {
                 buildAuthUri
             };
         })(),
+        Account: (() => {
+            /**
+             *  @param {object} oauthClient
+             *  @param {object} options
+             * */
+            async function receiveSelect(oauthClient, options) {
+
+            }
+
+            async function createOrReceive() {
+
+            }
+
+            return {}
+        })(),
         Customer: (() => {
 
             return {}
@@ -83,7 +167,9 @@ const QuickBooksService = (() => {
         Constants: {
             REALM_ID,
             APP_CENTER_BASE
-        }
+        },
+        getClient,
+        select
     }
 })()
 
