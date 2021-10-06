@@ -49,7 +49,7 @@ class LowDB {
     }
 }
 
-const file = path.join(__dirname, 'db.json')
+const file = path.join(__dirname, 'local_db.json')
 const db = new LowDB(file)
 
 db.readSync();
