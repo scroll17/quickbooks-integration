@@ -40,6 +40,7 @@ const QuickBooksService = (() => {
     const REDIRECT_URI = process.env.QUICK_BOOKS_REDIRECT_URI;
 
     const APP_CENTER_BASE = 'https://appcenter.intuit.com';
+    const MINOR_VERSION = 'minorversion=62'
 
     function getClient(tokenOptions) {
         const oauthClient = new OAuthClient({
@@ -63,7 +64,7 @@ const QuickBooksService = (() => {
         const selectStatement = buildSelectStatement(options);
 
         return oauthClient.makeApiCall({
-            url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/query?query=${selectStatement}`,
+            url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/query?query=${selectStatement}&${MINOR_VERSION}`,
             method: 'GET'
         })
     }
@@ -96,6 +97,10 @@ const QuickBooksService = (() => {
                 Object.entries(options.where),
                 ([key, value]) => {
                     if(_.isObject(value)) {
+                        if(_.isString(value.value) && _.includes(value.value, '%')) {
+                            value.value = value.value.replace('%', '%25')
+                        }
+
                         return `${key} ${value.op} ${
                             _.isBoolean(value.value) ? value.value : `'${value.value}'`
                         }`
@@ -120,12 +125,36 @@ const QuickBooksService = (() => {
             result += `MAXRESULTS ${options.limit}`
         }
 
+        console.debug('SELECT STATEMENT =', result)
 
         return result;
     }
 
     return {
         Auth: (() => {
+            /**
+             *  @param {object} oauthClient
+             *  @return {null | object} result
+             * */
+            async function actualizeTokens(oauthClient) {
+                if(!oauthClient.isAccessTokenValid()) {
+                    const authResponse = await oauthClient.refresh();
+                    const authTokens = JSON.stringify(authResponse.getJson(), null, 2);
+                    console.debug('TRACE auth token\n', authTokens)
+
+                    return {
+                        ...authResponse.getJson(),
+                        createdAt: Date.now()
+                    }
+                }
+
+                return null;
+            }
+
+            /**
+             *  @param {object} oauthClient
+             *  @return {string} result
+             * */
             function buildAuthUri(oauthClient) {
                 return oauthClient.authorizeUri({
                     scope: [
@@ -138,23 +167,27 @@ const QuickBooksService = (() => {
             }
 
             return {
-                buildAuthUri
+                buildAuthUri,
+                actualizeTokens
             };
         })(),
         Account: (() => {
             /**
              *  @param {object} oauthClient
-             *  @param {object} options
+             *  @param {string} accountId
              * */
-            async function receiveSelect(oauthClient, options) {
+            async function getById(oauthClient, accountId) {
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/account/${accountId}?${MINOR_VERSION}`,
+                    method: 'GET'
+                })
 
+                return response.getJson().Account
             }
 
-            async function createOrReceive() {
-
+            return {
+                getById
             }
-
-            return {}
         })(),
         Customer: (() => {
 
