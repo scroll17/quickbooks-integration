@@ -1,0 +1,79 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <title>Select income account</title>
+
+        <style>
+            #list {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #list div {
+                border: 2px solid black;
+                margin: 5px 0 5px 5px;
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root">
+           <span>
+             You need select Account for Income tracks. <br/>
+             Our App will use this Account for tracking Payouts (request / approve) and Approve Change Order.
+           </span>
+
+            <p>
+                <label for="input">Find account</label>
+                <input id="input" name="search-account" type="text"/>
+            </p>
+
+            <div id="list"></div>
+        </div>
+
+
+        <script>
+            const root = document.getElementById('root')
+            const list = document.getElementById('list')
+            const input = document.getElementById('input')
+
+            input.onchange = async (e) => {
+                const value = e.target.value;
+                if(value) {
+                    const res = await fetch(`http://localhost:3400/functional/find-account?name=${value}`)
+                    const { data } = await res.json();
+
+                    const cloneList = list.cloneNode(false);
+                    data.forEach(elData => {
+                        const div = document.createElement('div')
+
+                        div.innerHTML = `
+                            <span>Id: ${elData.Id}</span>
+                            <br />
+
+                            <span>Name: ${elData.Name}</span>
+                            <br />
+
+                            <span>AccountType: ${elData.AccountType}</span>
+                            <br />
+
+                            <span>AccountType: ${elData.AccountSubType}</span>
+                            <br />
+                        `
+
+                        div.onclick = async () => {
+                            const res = await fetch(`http://localhost:3400/functional/select-income-account/${elData.Id}`)
+                            const { redirectTo } = await res.json();
+
+                            window.location = redirectTo;
+                        }
+
+                        cloneList.appendChild(div);
+                    })
+
+                    root.replaceChild(cloneList, list);
+                }
+            }
+        </script>
+    </body>
+</html>
