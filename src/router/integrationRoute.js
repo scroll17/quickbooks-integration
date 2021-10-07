@@ -13,7 +13,9 @@ router.get('/callback', async (req, res) => {
 
     const userId = req.cookies['userId']
     if(!userId) {
-        throw new Error(`userId not exist`)
+        res.status(400).send({
+            error: 'userId not exist'
+        })
     }
 
     res.clearCookie('userId')
@@ -25,11 +27,12 @@ router.get('/callback', async (req, res) => {
     const authTokens = JSON.stringify(authResponse.getJson(), null, 2);
     console.debug('TRACE auth token\n', authTokens)
 
-    db.data = (db.data ?? {}).users = {
-        [userId]: {
-            tokens: authResponse.getJson()
-        }
+    db.data = (db.data ?? {})
+    db.data.users = (db.data.users ?? {});
+    db.data.users[userId] = {
+        tokens: authResponse.getJson()
     }
+
     await db.write();
     console.debug('DB: SAVED')
 
@@ -43,7 +46,9 @@ router.get('/:userId', (req, res) => {
 
     const userId = req.params['userId']
     if(!userId) {
-        throw new Error(`userId required in params!`)
+        res.status(400).send({
+            error: 'userId required in params!'
+        })
     }
 
     console.debug('userId = ', userId)
@@ -61,7 +66,9 @@ router.get('/requestToken/:userId', (req, res) => {
 
     const userId = req.params['userId']
     if(!userId) {
-        throw new Error(`userId required in params!`)
+        res.status(400).send({
+            error: 'userId required in params!'
+        })
     }
 
     console.debug('userId = ', userId)
