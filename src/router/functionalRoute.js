@@ -5,7 +5,7 @@ const QuickBooksService = require('../services/quickBooks/QuickBooksService')
 // db
 const db = require('../../data/index')
 
-const user = db.data.users['asdas'];
+const user = db.data.users['pro'];
 
 const router = express.Router();
 
@@ -19,64 +19,6 @@ router.get('/select-income-account-page', (req, res) => {
     console.log('')
 
     res.render('select-income-account.ejs', {})
-})
-
-router.get('/select-expense-account-page', (req, res) => {
-    console.info('GET /functional/select-expense-account')
-    console.info('RENDER select-expense-account.ejs')
-    console.log('')
-
-    res.render('select-expense-account.ejs', {})
-})
-
-router.get('/select-expense-account/:id', async (req, res) => {
-    console.info('GET /select-expense-account/:id')
-
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
-
-    const accountId = req.params['id']
-    if(!accountId) {
-        return res.status(400).send({
-            error: 'id in param not exist!'
-        })
-    }
-    console.debug('accountId =', accountId)
-
-    const account = await QuickBooksService.Account.getById(oauthClient, accountId);
-    console.debug('TRACE account:\n', account)
-    console.log('')
-
-    if(!account.Active) {
-        // ERROR
-        return res.status(400).send({
-            error: 'Account must be Active'
-        })
-    }
-
-    if(account.AccountType !== 'Expense') {
-        // ERROR
-        return res.status(400).send({
-            error: 'Account.AccountType must be Expense'
-        })
-    }
-
-    user.Accounts = (user.Accounts ?? {});
-    user.Accounts.Expense = account
-
-    await db.write();
-
-    res.send({
-        redirectTo: '/functional/user'
-    })
 })
 
 router.get('/select-income-account/:id', async (req, res) => {
