@@ -10,6 +10,7 @@ const router = express.Router();
 
 const WEBHOOK_SECRET_TOKEN = process.env.QUCIK_BOOKS_WEBHOOK_TOKEN;
 
+// https://developer.intuit.com/app/developer/qbo/docs/develop/webhooks
 router.post('/', async (req, res) => {
     const webhookPayload = JSON.stringify(req.body);
     if (!webhookPayload) {
@@ -35,7 +36,8 @@ router.post('/', async (req, res) => {
     }
 
     // some work
-    console.debug('WEBHOOK: payload =>', webhookPayload);
+    console.debug('WEBHOOK: payload =>');
+    console.dir(webhookPayload, { depth: 20 });
 
     return res.status(200).send('SUCCESS');
 })
