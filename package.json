@@ -14,7 +14,8 @@
     "ejs": "2.5.5",
     "express": "^4.13.3",
     "intuit-oauth": "^4.0.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "ngrok": "^4.2.2"
   },
   "keywords": [],
   "author": "",

@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const path = require('path')
+const ngrok = require('ngrok')
 // db
 const db = require('../data/index.js')
 
@@ -24,8 +25,11 @@ app.use(cookieParser())
 
 app.use(require('./router'))
 
-const server = app.listen(app.get('port'), function () {
+const server = app.listen(app.get('port'), async () => {
     console.log('Express server listening on port ' + app.get('port') + '\n');
+
+    const url = await ngrok.connect(app.get('port'));
+    console.log('NGROK url:', url, '\n')
 });
 
 // exit
