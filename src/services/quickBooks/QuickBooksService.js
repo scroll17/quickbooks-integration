@@ -167,16 +167,23 @@ const QuickBooksService = (() => {
 
             /**
              *  @param {object} oauthClient
+             *  @param {string | undefined} payload
              *  @return {string} result
              * */
-            function buildAuthUri(oauthClient) {
+            function buildAuthUri(oauthClient, payload) {
                 return oauthClient.authorizeUri({
                     scope: [
                         OAuthClient.scopes.Accounting,
                         OAuthClient.scopes.Payment,
                         OAuthClient.scopes.OpenId
                     ],
-                    state: 'test',
+                    state: payload,
+                    /**
+                     *   The purpose of the state field is to validate if the client (i.e. your app) gets back what was sent in the original request.
+                     *   Thus, the state is maintained from send to response.
+                     *
+                     *   By default OAuthClient use CSRF token
+                     **/
                 });
             }
 
