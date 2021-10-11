@@ -15,12 +15,26 @@
  *    2. Skip "Actual Cost per Payout Request"
  *    3. Create / update (or not) Invoice if:
  *      - "Pro Request Payout"
- *      - "Client approved payment" (Owner approve payout)
+ *      - "Client approved payment" (Owner approve payout) (Skip for Subscription Plan)
  *      - "Approved Change Order"
  *   4. Now ignore "Timeclock Entries"
  *
  *    For Subscription only:
  *      - Wait "Client paid" from QuickBooks after "Client approved payment"
+ *
+ *   Updated Plan:
+ *      1. Pro connect QuickBooks Account (Income type)
+ *      2. When "Estimate Approve" we create Customer(if not exist) for selected QuickBooks Account by current Project
+ *        2.1. Create by each Phase Item in QuickBooks and in description write list tasks
+ *        2.2. If Item with passed name exist - create Item with Name - Contract Name
+ *      3. When Pro request Payout - need create Invoice (QuickBooks)
+ *      4. Client approve payment / Client paid:
+ *          For Subscription Plan:
+ *            4.1. By webhook we wait notification about Invoice paid (Invoice.Balance = 0.0) and then make Payment Release as succeeded
+ *            4.2. We block Mutation releaseFundPhase (and any release*)
+ *          For default plan:
+ *            4.2. In QuickBooks we make Invoice as paid
+ *      5. When Approve Change Order in short - we need create or update Item cost / description
  * */
 
 // external modules
