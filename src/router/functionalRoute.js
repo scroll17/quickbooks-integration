@@ -251,7 +251,62 @@ router.post('/approve-estimate', async (req, res) => {
 })
 
 router.post('/request-payout', async (req, res) => {
+    console.info('POST /functional/request-payout')
+    console.debug('TRACE req.body', req.body)
 
+    const phaseName = req.body['phaseName']
+    if(!phaseName) {
+        return res.status(400).send({
+            error: 'phase name in body not exist!'
+        })
+    }
+    console.debug('phaseName =', phaseName)
+
+    const oauthClient = QuickBooksService.getClient(user.tokens);
+
+    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
+    if(newTokens) {
+        const authTokens = JSON.stringify(newTokens, null, 2);
+        console.debug('TRACE auth token\n', authTokens)
+
+        user.tokens = newTokens;
+        await db.write();
+    }
+
+    const customer = user.Customer;
+    const currentProject = user.CurrentProject;
+    const projectOwner = currentProject.Owner;
+
+    const phase = currentProject.Estimate.phases.find(p => p.name === phaseName);
+    if(!phase) {
+        return res.status(404).send({
+            error: 'phase not found!'
+        })
+    }
+
+    console.log('START CREATE INVOICE')
+    const invoice = await QuickBooksService.Invoice.create(oauthClient, {
+        customer,
+        customerEmail: projectOwner.email,
+        needPay: true,
+        phaseName,
+        phaseAmount: _.sumBy(phase.tasks, t => t.cost),
+        item: phase.Item
+    })
+    console.log('INVOICE CREATED')
+
+    console.debug('TRACE INVOICE:')
+    console.dir(invoice, { depth: 10 })
+
+    phase.Invoice = invoice;
+
+    await db.write();
+    console.log('DB: SAVED');
+    console.log('');
+
+    return res
+        .contentType('text')
+        .send(JSON.stringify(user, null, 2))
 })
 
 module.exports = router;

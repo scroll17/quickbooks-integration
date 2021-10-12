@@ -35,6 +35,9 @@
  *          For default plan:
  *            4.2. In QuickBooks we make Invoice as paid
  *      5. When Approve Change Order in short - we need create or update Item cost / description
+ *
+ *  Helpful links:
+ *      https://help.developer.intuit.com/s/question/0D5G000004Dk6N0/can-you-use-the-api-to-mark-an-invoice-as-paid
  * */
 
 // external modules
@@ -293,6 +296,7 @@ const QuickBooksService = (() => {
                         WebAddr: {
                             URI: COMPANY_URL
                         },
+                        PreferredDeliveryMethod: 'Email',
                         // IsProject: true // TODO: is need ?
                     }
                 })
@@ -394,8 +398,59 @@ const QuickBooksService = (() => {
             }
         })(),
         Invoice: (() => {
+            /**
+             *  @param {object} oauthClient
+             *  @param {object} params
+             * */
+            async function create(oauthClient, params) {
+                const {
+                    customer,
+                    customerEmail,
+                    needPay,
+                    phaseName,
+                    phaseAmount,
+                    item
+                } = params;
 
-            return {}
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/invoice?${MINOR_VERSION}`,
+                    method: 'POST',
+                    body: {
+                        CurrencyRef: {
+                            value: 'USD',
+                            name: 'United States Dollar'
+                        },
+                        CustomerRef: {
+                            value: customer.Id,
+                            name: customer.DisplayName
+                        },
+                        Line: [{
+                            DetailType: 'SalesItemLineDetail',
+                            LineNum: 1,
+                            Description: `Pay for ${phaseName}`,
+                            Amount: phaseAmount,
+                            SalesItemLineDetail: {
+                                ItemRef: {
+                                    value: item.Id,
+                                    name: item.Name
+                                }
+                            }
+
+                        }],
+                        BillEmail: {
+                            Address: customerEmail
+                        },
+                        PrintStatus: needPay ? 'NeedToPrint' : 'NotSet',
+                        EmailStatus: needPay ? 'NeedToSend' : 'EmailSent'
+                    }
+                })
+
+                return response.getJson().Invoice
+            }
+
+            return {
+                create
+            }
         })(),
         Constants: {
             REALM_ID,
