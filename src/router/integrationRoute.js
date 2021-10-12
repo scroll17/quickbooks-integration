@@ -1,5 +1,6 @@
 // external modules
 const express = require('express');
+const qs = require('querystring')
 // services
 const QuickBooksService = require('../services/quickBooks/QuickBooksService')
 // db
@@ -11,14 +12,16 @@ router.get('/callback', async (req, res) => {
     console.info('GET /integration/callback')
     console.debug('TRACE req.url', req.url)
 
-    const userId = req.cookies['userId']
+    const queryParams = qs.parse(req.url.slice(req.url.indexOf('?') + 1));
+    console.debug('TRACE queryParams', queryParams)
+
+    const userId = queryParams['state']
     if(!userId) {
-        res.status(400).send({
+        return res.status(400).send({
             error: 'userId not exist'
         })
     }
 
-    res.clearCookie('userId')
     console.debug('userId = ', userId)
 
     const oauthClient = QuickBooksService.getClient();
@@ -37,7 +40,7 @@ router.get('/callback', async (req, res) => {
     console.debug('DB: SAVED')
 
     console.log('')
-    res.send({ status: 'OK' })
+    return res.send({ status: 'OK' })
 })
 
 router.get('/:userId', (req, res) => {
@@ -46,7 +49,7 @@ router.get('/:userId', (req, res) => {
 
     const userId = req.params['userId']
     if(!userId) {
-        res.status(400).send({
+        return res.status(400).send({
             error: 'userId required in params!'
         })
     }
@@ -54,7 +57,7 @@ router.get('/:userId', (req, res) => {
     console.debug('userId = ', userId)
     console.log('')
 
-    res.render('intuit.ejs', {
+    return res.render('intuit.ejs', {
         port: process.env.PORT,
         appCenter: QuickBooksService.Constants.APP_CENTER_BASE,
         userId
@@ -66,7 +69,7 @@ router.get('/requestToken/:userId', (req, res) => {
 
     const userId = req.params['userId']
     if(!userId) {
-        res.status(400).send({
+        return res.status(400).send({
             error: 'userId required in params!'
         })
     }
@@ -74,13 +77,11 @@ router.get('/requestToken/:userId', (req, res) => {
     console.debug('userId = ', userId)
 
     const oauthClient = QuickBooksService.getClient();
-    const authUri = QuickBooksService.Auth.buildAuthUri(oauthClient);
+    const authUri = QuickBooksService.Auth.buildAuthUri(oauthClient, userId);
 
     console.info('REDIRECT TO ', authUri)
     console.log('')
-
-    res.cookie('userId', userId)
-    res.redirect(authUri);
+    return res.redirect(authUri);
 })
 
 module.exports = router;
