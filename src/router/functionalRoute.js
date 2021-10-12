@@ -250,4 +250,8 @@ router.post('/approve-estimate', async (req, res) => {
         .send(JSON.stringify(user, null, 2))
 })
 
+router.post('/request-payout', async (req, res) => {
+
+})
+
 module.exports = router;
