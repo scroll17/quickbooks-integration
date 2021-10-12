@@ -1,4 +1,5 @@
 // external modules
+const _ = require('lodash')
 const express = require('express');
 // services
 const QuickBooksService = require('../services/quickBooks/QuickBooksService')
@@ -10,7 +11,12 @@ const user = db.data.users['pro'];
 const router = express.Router();
 
 router.get('/user', (_, res) => {
-    res.contentType('text').send(JSON.stringify(user, null, 2))
+    console.info('GET /functional/user')
+    console.log('')
+
+    return res
+        .contentType('text')
+        .send(JSON.stringify(user, null, 2))
 })
 
 router.get('/select-expense-account-page', (req, res) => {
@@ -21,8 +27,9 @@ router.get('/select-expense-account-page', (req, res) => {
     res.render('select-expense-account.ejs', {})
 })
 
-router.get('/select-expense-account/:id', async (req, res) => {
-    console.info('GET /select-expense-account/:id')
+router.post('/select-expense-account/:id', async (req, res) => {
+    console.info('POST /functional/select-expense-account/:id')
+    console.debug('TRACE req.body\n', req.body)
 
     const oauthClient = QuickBooksService.getClient(user.tokens);
 
@@ -79,8 +86,9 @@ router.get('/select-income-account-page', (req, res) => {
     res.render('select-income-account.ejs', {})
 })
 
-router.get('/select-income-account/:id', async (req, res) => {
-    console.info('GET /select-income-account/:id')
+router.post('/select-income-account/:id', async (req, res) => {
+    console.info('POST /functional/select-income-account/:id')
+    console.debug('TRACE req.body\n', req.body)
 
     const oauthClient = QuickBooksService.getClient(user.tokens);
 
@@ -161,12 +169,85 @@ router.get('/find-account', async (req, res) => {
             }
         }
     });
-    console.debug('TRACE response QueryResponse:\n', response.getJson().QueryResponse)
+    console.debug('TRACE response QueryResponse:\n', response)
     console.log('')
 
     res.send({
-        data: response.getJson().QueryResponse.Account
+        data: response.Account
     })
+})
+
+router.post('/approve-estimate', async (req, res) => {
+    console.info('POST /functional/approve-estimate')
+    console.debug('TRACE req.body', req.body)
+
+    const oauthClient = QuickBooksService.getClient(user.tokens);
+
+    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
+    if(newTokens) {
+        const authTokens = JSON.stringify(newTokens, null, 2);
+        console.debug('TRACE auth token\n', authTokens)
+
+        user.tokens = newTokens;
+        await db.write();
+    }
+
+    const currentProject = user.CurrentProject;
+    const projectOwner = currentProject.Owner;
+    const projectEstimate = currentProject.Estimate;
+
+    const address = _.get(_.split(currentProject.name, '/'), 0);
+
+    let customer = await QuickBooksService.Customer.findByEmail(oauthClient, projectOwner.email);
+    if(!customer) {
+        console.debug('CUSTOMER by email:', projectOwner.email, 'not exist!');
+
+        customer = await QuickBooksService.Customer.create(oauthClient, {
+            ...projectOwner,
+            contractAddress: address
+        })
+        console.debug('CUSTOMER by email:', projectOwner.email, 'created!');
+    } else {
+        console.debug('CUSTOMER by email:', projectOwner.email, 'exist!');
+    }
+
+    console.debug('TRACE CUSTOMER:')
+    console.dir(customer, { depth: 10 })
+
+    user.Customer = customer;
+    await db.write();
+    console.log('DB: SAVED');
+
+    console.log('START CREATE ITEMS')
+    const incomeAccount = user.Accounts.Income;
+    const expenseAccount = user.Accounts.Expense;
+
+    await Promise.all(
+        _.map(projectEstimate.phases, async phase => {
+            const item = await QuickBooksService.Item.create(oauthClient, {
+                name: phase.name,
+                contractAddress: address,
+                incomeAccount,
+                expenseAccount,
+                tasks: phase.tasks
+            })
+            console.debug('ITEM by phase:', phase.name, 'created!');
+            console.debug('TRACE ITEM:')
+            console.dir(item, { depth: 10 })
+
+            phase.Item = item;
+        })
+    )
+
+    await db.write();
+    console.log('DB: SAVED');
+
+    console.log('END CREATE ITEMS')
+    console.log('')
+
+    return res
+        .contentType('text')
+        .send(JSON.stringify(user, null, 2))
 })
 
 module.exports = router;

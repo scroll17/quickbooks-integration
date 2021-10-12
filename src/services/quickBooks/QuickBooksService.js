@@ -47,6 +47,9 @@ const QuickBooksService = (() => {
 
     const isDevEnv = process.env.ENV === 'develop';
 
+    const COMPANY_NAME = process.env.COMPANY_NAME
+    const COMPANY_URL = `http:${process.env.HOST}:${process.env.PORT}/`
+
     const REALM_ID = process.env.REALM_ID
     const CONSUMER_KEY = process.env.QUICK_BOOKS_CONSUMER_KEY;
     const CONSUMER_SECRET = process.env.QUICK_BOOKS_CONSUMER_SECRET;
@@ -77,10 +80,12 @@ const QuickBooksService = (() => {
     async function select(oauthClient, options) {
         const selectStatement = buildSelectStatement(options);
 
-        return oauthClient.makeApiCall({
+        const response = await oauthClient.makeApiCall({
             url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/query?query=${selectStatement}&${MINOR_VERSION}`,
             method: 'GET'
         })
+
+        return response.getJson().QueryResponse;
     }
 
     /**
@@ -226,8 +231,167 @@ const QuickBooksService = (() => {
             }
         })(),
         Customer: (() => {
+            /**
+             *  @param {object} oauthClient
+             *  @param {string} email
+             * */
+            async function findByEmail(oauthClient, email) {
+                const response = await QuickBooksService.select(oauthClient, {
+                    from: 'Customer',
+                    select: ['*'],
+                    where: {
+                        'PrimaryEmailAddr': email
+                    }
+                });
 
-            return {}
+                return response.Customer
+            }
+
+            /**
+             *  @param {object} oauthClient
+             *  @param {object} params
+             * */
+            async function create(oauthClient, params) {
+                const {
+                    username,
+                    email,
+                    firstName,
+                    lastName,
+                    phone,
+                    contractAddress
+                } = params;
+
+                const [
+                    city,
+                    state,
+                    postalCodeRaw
+                ] = contractAddress.trim().split(',');
+
+                let postalCode = postalCodeRaw.trim();
+                postalCode = postalCode.slice(postalCode.indexOf(' ') + 1);
+
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/customer?${MINOR_VERSION}`,
+                    method: 'POST',
+                    body: {
+                        ...(username ? { Title: username } : {}),
+                        GivenName: firstName,
+                        FamilyName: lastName,
+                        PrimaryEmailAddr: {
+                            Address: email
+                        },
+                        PrimaryPhone: {
+                            FreeFormNumber: phone
+                        },
+                        BillAddr: {
+                            Country: 'USA',
+                            CountrySubDivisionCode: state,
+                            City: city,
+                            PostalCode: postalCode
+                        },
+                        CompanyName: COMPANY_NAME,
+                        WebAddr: {
+                            URI: COMPANY_URL
+                        },
+                        // IsProject: true // TODO: is need ?
+                    }
+                })
+
+                return response.getJson().Customer
+            }
+
+            return {
+                findByEmail,
+                create
+            }
+        })(),
+        Item: (() => {
+            /**
+             *  @param {string} name
+             *  @param {string} contractName
+             *  @return string
+             * */
+            function buildItemName(name, contractName) {
+                contractName = contractName.trim();
+
+                const nameLen = name.length;
+                const contractNameLen = contractName.length;
+
+                const separator = ' - ';
+                const separatorLen = separator.length;
+
+                if((nameLen + contractNameLen + separatorLen) <= 100) {
+                    return name + separator + contractName;
+                }
+
+                const partsOfContractName = _.chain(contractName)
+                    .split(',')
+                    .map(part => part.trim())
+                    .value();
+
+                let resultName = name + separator;
+                let partsToConcatenate = [];
+                while(partsOfContractName.length > 0) {
+                    const part = partsOfContractName.pop();
+                    const otherPartsLen = _.sumBy(partsToConcatenate, part => part.length + ', '.length);
+
+                    if((resultName.length + otherPartsLen + part.length) > 100) {
+                        break;
+                    }
+
+                    partsToConcatenate.push(part);
+                }
+
+                if(partsToConcatenate.length) {
+                    return resultName + partsToConcatenate.reverse().join(', ')
+                }
+
+                return resultName.slice(0, -separatorLen)
+            }
+
+            /**
+             *  @param {object} oauthClient
+             *  @param {object} params
+             * */
+            async function create(oauthClient, params) {
+                const {
+                    name,
+                    contractAddress,
+                    incomeAccount,
+                    expenseAccount,
+                    tasks
+                } = params;
+
+                const itemName = buildItemName(name, contractAddress);
+
+                const price = _.sumBy(tasks, t => t.cost);
+                const description = _.map(tasks, (t, i) => `[${i + 1}]: ${t.name}`).join(';\n');
+
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/item?${MINOR_VERSION}`,
+                    method: 'POST',
+                    body: {
+                        Name: itemName,
+                        Type: 'Service',
+                        IncomeAccountRef: {
+                            name: incomeAccount.Name,
+                            value: incomeAccount.Id
+                        },
+                        ExpenseAccountRef: {
+                            name: expenseAccount.Name,
+                            value: expenseAccount.Id
+                        },
+                        Description: description,
+                        UnitPrice: price
+                    }
+                })
+
+                return response.getJson().Item
+            }
+
+            return {
+                create
+            }
         })(),
         Invoice: (() => {
 
@@ -245,7 +409,7 @@ const QuickBooksService = (() => {
 
 // ;(async () => {
 //     const db = require('../../../data/index')
-//     const user = db.data.users['pro2'];
+//     const user = db.data.users['pro'];
 //
 //     const oauthClient = QuickBooksService.getClient(user.tokens);
 //
@@ -289,10 +453,10 @@ const QuickBooksService = (() => {
 //     // })
 //
 //     const response = await QuickBooksService.select(oauthClient, {
-//         from: 'Customer',
-//         select: ['DisplayName', 'Id'],
+//         from: 'Account',
+//         select: ['Name', 'AccountType', 'AccountSubType'],
 //         where: {
-//             'Active': true
+//             AccountType: "Cost of Goods Sold"
 //         }
 //     });
 //     console.log('response => ')
