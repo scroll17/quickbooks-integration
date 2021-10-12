@@ -13,7 +13,19 @@ const WEBHOOK_SECRET_TOKEN = process.env.QUCIK_BOOKS_WEBHOOK_TOKEN;
 
 const InvoiceHandlers = {
     async OnUpdate(entity) {
+        // wait notification about Invoice paid (Invoice.Balance = 0.0)
+    }
+}
 
+const AccountHandlers = {
+    async OnUpdate(entity) {
+        // wait notification about Account (Income / Expense) when hes updated own name
+    }
+}
+
+const CustomerHandlers = {
+    async OnUpdate(entity) {
+        // wait notification about Customer updated own name (DisplayName)
     }
 }
 
@@ -94,7 +106,9 @@ router.post('/', async (req, res) => {
 
     // handle entities
     await handleEntities(dataChangeEvent.entities, {
-        Invoice: InvoiceHandlers
+        Invoice: InvoiceHandlers,
+        Account: AccountHandlers,
+        Customer: CustomerHandlers
     })
 
     return res.status(200).send('SUCCESS');
