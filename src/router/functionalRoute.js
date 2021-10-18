@@ -460,7 +460,7 @@ router.put('/update-phase', async (req, res) => {
         })
         console.debug('INVOICE UPDATE');
         console.debug('TRACE INVOICE:')
-        console.dir(item, { depth: 10 })
+        console.dir(invoice, { depth: 10 })
 
         updatedPhase.Invoice = invoice;
 
