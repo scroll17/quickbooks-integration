@@ -386,4 +386,88 @@ router.post('/create-phase', async (req, res) => {
         .send(JSON.stringify(phases, null, 2))
 })
 
+router.put('/update-phase', async (req, res) => {
+    console.info('PUT /functional/update-phase')
+    console.debug('TRACE req.body', req.body)
+
+    const { value, error } = Joi
+        .object({
+            name: Joi
+                .string()
+                .required(),
+            tasks: Joi
+                .array()
+                .items(
+                    Joi.object({
+                        name: Joi.string().required(),
+                        cost: Joi.number().required()
+                    })
+                )
+                .required()
+        })
+        .validate(req.body);
+    if(error) {
+        throw new Error(error.message)
+    }
+
+    let updatedPhase = value;
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user);
+
+    const currentProject = user.CurrentProject;
+    const phases = user.CurrentProject.Estimate.phases;
+
+    const oldPhaseIndex = _.findIndex(phases, { name: updatedPhase.name });
+    const oldPhase = phases[oldPhaseIndex];
+    if(!oldPhase) {
+        throw new Error(`Phases not found`)
+    }
+
+    if(_.isEqual(oldPhase.tasks, updatedPhase.tasks)) {
+        return res.status(202).send({
+            message: 'Tasks not updated'
+        })
+    }
+
+    updatedPhase = phases[oldPhaseIndex] = {
+        ...oldPhase,
+        ...updatedPhase
+    };
+
+    console.log('START UPDATE ITEM')
+    const item = await QuickBooksService.Item.update(oauthClient, {
+        itemId: updatedPhase.Item.Id,
+        tasks: updatedPhase.tasks
+    })
+    console.debug('ITEM UPDATE');
+    console.debug('TRACE ITEM:')
+    console.dir(item, { depth: 10 })
+
+    updatedPhase.Item = item;
+
+    await db.write();
+    console.log('DB: SAVED');
+
+    if(updatedPhase.Invoice) {
+        console.log('PHASE HAVE INVOICE')
+
+        console.log('START UPDATE INVOICE')
+        const invoice = await QuickBooksService.Invoice.update(oauthClient, {
+            invoiceId: updatedPhase.Invoice.Id,
+            phaseAmount: _.sumBy(updatedPhase.tasks, t => t.cost)
+        })
+        console.debug('INVOICE UPDATE');
+        console.debug('TRACE INVOICE:')
+        console.dir(item, { depth: 10 })
+
+        updatedPhase.Invoice = invoice;
+
+        await db.write();
+        console.log('DB: SAVED');
+    }
+
+    return res
+        .contentType('text')
+        .send(JSON.stringify(user, null, 2))
+})
+
 module.exports = router;
