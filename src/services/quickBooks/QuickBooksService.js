@@ -112,6 +112,30 @@ const QuickBooksService = (() => {
     }
 
     /**
+     *  @param {object} oauthClient
+     *  @param {string} entityName
+     *  @param {string} entityId
+     * */
+    async function getActualSyncToken(oauthClient, entityName, entityId) {
+        const selectStatement = buildSelectStatement({
+            from: entityName,
+            select: ['SyncToken'],
+            where: {
+                Id: entityId
+            }
+        });
+
+        const response = await oauthClient.makeApiCall({
+            url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/query?query=${selectStatement}&${MINOR_VERSION}`,
+            method: 'GET'
+        })
+
+        const jsonResponse = response.getJson();
+        return _.get(jsonResponse, ['QueryResponse', entityName, 0, 'SyncToken']);
+    }
+
+
+    /**
      *  @param {string} options.from
      *  @param {string[] | undefined} options.select
      *  @param {object | undefined} options.where
@@ -413,8 +437,39 @@ const QuickBooksService = (() => {
                 return response.getJson().Item
             }
 
+            /**
+             *  @param {object} oauthClient
+             *  @param {object} params
+             * */
+            async function update(oauthClient, params) {
+                const {
+                    itemId,
+                    tasks
+                } = params;
+
+                const price = _.sumBy(tasks, t => t.cost);
+                const description = _.map(tasks, (t, i) => `[${i + 1}]: ${t.name}`).join(';\n');
+
+                const syncToken = await getActualSyncToken(oauthClient, 'Item', itemId)
+
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/item?${MINOR_VERSION}`,
+                    method: 'POST',
+                    body: {
+                        sparse: true,
+                        Id: itemId,
+                        SyncToken: syncToken,
+                        Description: description,
+                        UnitPrice: price
+                    }
+                })
+
+                return response.getJson().Item
+            }
+
             return {
-                create
+                create,
+                update
             }
         })(),
         Invoice: (() => {
@@ -470,6 +525,46 @@ const QuickBooksService = (() => {
 
             /**
              *  @param {object} oauthClient
+             *  @param {object} params
+             * */
+            async function update(oauthClient, params) {
+                const {
+                    invoiceId,
+                    phaseAmount,
+                } = params;
+
+                const queryResult = await select(oauthClient, {
+                    from: 'Invoice',
+                    select: ['Line', 'SyncToken'],
+                    where: {
+                        Id: invoiceId
+                    }
+                })
+
+                const invoice = queryResult.Invoice[0];
+                const syncToken = invoice.SyncToken
+                const lines = invoice.Line;
+
+                const lineForUpdate = _.find(lines, { Id: '1' });
+                lineForUpdate.Amount = phaseAmount;
+
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/invoice?${MINOR_VERSION}`,
+                    method: 'POST',
+                    body: {
+                        sparse: true,
+                        Id: invoiceId,
+                        SyncToken: syncToken,
+                        TxnTaxDetail: null,
+                        Line: lines
+                    }
+                })
+
+                return response.getJson().Invoice
+            }
+
+            /**
+             *  @param {object} oauthClient
              *  @param {string} invoiceId
              * */
             async function getById(oauthClient, invoiceId) {
@@ -483,6 +578,7 @@ const QuickBooksService = (() => {
 
             return {
                 create,
+                update,
                 getById
             }
         })(),
@@ -541,6 +637,7 @@ const QuickBooksService = (() => {
         },
         getClient,
         getUpToDateClient,
+        getActualSyncToken,
         select
     }
 })()
