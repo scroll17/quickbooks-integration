@@ -25,6 +25,13 @@ app.use(cookieParser())
 
 app.use(require('./router'))
 
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    return res.status(500).send({
+        error: err
+    });
+});
+
 const server = app.listen(app.get('port'), async () => {
     console.log('Express server listening on port ' + app.get('port') + '\n');
 
