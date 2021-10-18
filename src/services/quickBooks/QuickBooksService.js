@@ -448,8 +448,70 @@ const QuickBooksService = (() => {
                 return response.getJson().Invoice
             }
 
+            /**
+             *  @param {object} oauthClient
+             *  @param {string} invoiceId
+             * */
+            async function getById(oauthClient, invoiceId) {
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/invoice/${invoiceId}?${MINOR_VERSION}`,
+                    method: 'GET'
+                })
+
+                return response.getJson().Invoice
+            }
+
             return {
-                create
+                create,
+                getById
+            }
+        })(),
+        Payment: (() => {
+            /**
+             *  @param {object} oauthClient
+             *  @param {object} params
+             * */
+            async function createFakeInvoicePayment(oauthClient, params) {
+                const {
+                    customer,
+                    amount,
+                    invoiceId,
+                    date
+                } = params;
+
+                const response = await oauthClient.makeApiCall({
+                    url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${REALM_ID}/payment?${MINOR_VERSION}`,
+                    method: 'POST',
+                    body: {
+                        ...(date ? { TxnDate: date } : {}),
+                        TotalAmt: amount,
+                        CustomerRef: {
+                            value: customer.Id,
+                            name: customer.DisplayName
+                        },
+                        CurrencyRef: {
+                            value: 'USD',
+                            name: 'United States Dollar'
+                        },
+                        Line: [
+                            {
+                                Amount: amount,
+                                LinkedTxn: [
+                                    {
+                                        TxnId: invoiceId,
+                                        TxnType: 'Invoice'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                })
+
+                return response.getJson().Payment
+            }
+
+            return {
+                createFakeInvoicePayment
             }
         })(),
         Constants: {

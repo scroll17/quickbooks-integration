@@ -309,4 +309,72 @@ router.post('/request-payout', async (req, res) => {
         .send(JSON.stringify(user, null, 2))
 })
 
+router.post('/approve-payout', async (req, res) => {
+    console.info('POST /functional/approve-payout')
+    console.debug('TRACE req.body', req.body)
+
+    const phaseName = req.body['phaseName']
+    if(!phaseName) {
+        return res.status(400).send({
+            error: 'phase name in body not exist!'
+        })
+    }
+    console.debug('phaseName =', phaseName)
+
+    const oauthClient = QuickBooksService.getClient(user.tokens);
+
+    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
+    if(newTokens) {
+        const authTokens = JSON.stringify(newTokens, null, 2);
+        console.debug('TRACE auth token\n', authTokens)
+
+        user.tokens = newTokens;
+        await db.write();
+    }
+
+    const customer = user.Customer;
+    const currentProject = user.CurrentProject;
+
+    const phase = currentProject.Estimate.phases.find(p => p.name === phaseName);
+    if(!phase) {
+        return res.status(404).send({
+            error: 'phase not found!'
+        })
+    }
+
+    console.log('START CREATE PAYMENT')
+    const payment = await QuickBooksService.Payment.createFakeInvoicePayment(oauthClient, {
+        customer,
+        amount: phase.Invoice.TotalAmt,
+        date: new Date(Date.now() + (1000 * 60 * 60 * 24)), // next day
+        invoiceId: phase.Invoice.Id
+    })
+    console.log('PAYMENT CREATED')
+
+    console.debug('TRACE PAYMENT:')
+    console.dir(payment, { depth: 10 })
+
+    phase.Payment = payment;
+
+    await db.write();
+    console.log('DB: SAVED');
+    console.log('');
+
+    console.log('REQUEST UPDATED INVOICE')
+    const updatedInvoice = await QuickBooksService.Invoice.getById(oauthClient, phase.Invoice.Id);
+
+    console.debug('TRACE UPDATED INVOICE:')
+    console.dir(updatedInvoice, { depth: 10 })
+
+    phase.UpdatedInvoice = updatedInvoice;
+
+    await db.write();
+    console.log('DB: SAVED');
+    console.log('');
+
+    return res
+        .contentType('text')
+        .send(JSON.stringify(user, null, 2))
+})
+
 module.exports = router;
