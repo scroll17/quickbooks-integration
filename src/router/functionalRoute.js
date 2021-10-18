@@ -31,16 +31,7 @@ router.post('/select-expense-account/:id', async (req, res) => {
     console.info('POST /functional/select-expense-account/:id')
     console.debug('TRACE req.body\n', req.body)
 
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
     const accountId = req.params['id']
     if(!accountId) {
@@ -90,16 +81,7 @@ router.post('/select-income-account/:id', async (req, res) => {
     console.info('POST /functional/select-income-account/:id')
     console.debug('TRACE req.body\n', req.body)
 
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
     const accountId = req.params['id']
     if(!accountId) {
@@ -140,16 +122,7 @@ router.post('/select-income-account/:id', async (req, res) => {
 router.get('/find-account', async (req, res) => {
     console.info('GET /functional/find-account')
 
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
     const accountName = req.query['name']
     if(!accountName) {
@@ -181,16 +154,7 @@ router.post('/approve-estimate', async (req, res) => {
     console.info('POST /functional/approve-estimate')
     console.debug('TRACE req.body', req.body)
 
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
     const currentProject = user.CurrentProject;
     const projectOwner = currentProject.Owner;
@@ -262,16 +226,7 @@ router.post('/request-payout', async (req, res) => {
     }
     console.debug('phaseName =', phaseName)
 
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
     const customer = user.Customer;
     const currentProject = user.CurrentProject;
@@ -321,16 +276,7 @@ router.post('/approve-payout', async (req, res) => {
     }
     console.debug('phaseName =', phaseName)
 
-    const oauthClient = QuickBooksService.getClient(user.tokens);
-
-    const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-    if(newTokens) {
-        const authTokens = JSON.stringify(newTokens, null, 2);
-        console.debug('TRACE auth token\n', authTokens)
-
-        user.tokens = newTokens;
-        await db.write();
-    }
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
     const customer = user.Customer;
     const currentProject = user.CurrentProject;

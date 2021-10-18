@@ -77,6 +77,26 @@ const QuickBooksService = (() => {
     }
 
     /**
+     *  @param {object} tokens
+     *  @param {object} db
+     *  @param {object} userData
+     * */
+    async function getUpToDateClient(tokens, db, userData) {
+        const oauthClient = QuickBooksService.getClient(tokens);
+
+        const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
+        if(newTokens) {
+            const authTokens = JSON.stringify(newTokens, null, 2);
+            console.debug('TRACE auth token\n', authTokens)
+
+            userData.tokens = newTokens;
+            await db.write();
+        }
+
+        return oauthClient
+    }
+
+    /**
      *  @param {object} oauthClient
      *  @param {object} options
      * */
@@ -520,69 +540,9 @@ const QuickBooksService = (() => {
             MINOR_VERSION
         },
         getClient,
+        getUpToDateClient,
         select
     }
 })()
-
-// ;(async () => {
-//     const db = require('../../../data/index')
-//     const user = db.data.users['pro'];
-//
-//     const oauthClient = QuickBooksService.getClient(user.tokens);
-//
-//     const newTokens = await QuickBooksService.Auth.actualizeTokens(oauthClient);
-//     if(newTokens) {
-//         const authTokens = JSON.stringify(newTokens, null, 2);
-//         console.debug('TRACE auth token\n', authTokens)
-//
-//         user.tokens = newTokens;
-//         await db.write();
-//     }
-//
-//
-//     // const response = await oauthClient.makeApiCall({
-//     //     url: `https://sandbox-quickbooks.api.intuit.com/v3/company/${QuickBooksService.Constants.REALM_ID}/customer?${QuickBooksService.Constants.MINOR_VERSION}`,
-//     //     method: 'POST',
-//     //     body: {
-//     //         "FullyQualifiedName": "King Groceries",
-//     //         "PrimaryEmailAddr": {
-//     //             "Address": "jdrew@myemail.com"
-//     //         },
-//     //         "DisplayName": "King's Groceries",
-//     //         "Suffix": "Jr",
-//     //         "Title": "Mr",
-//     //         "MiddleName": "B",
-//     //         "Notes": "Here are other details.",
-//     //         "FamilyName": "King",
-//     //         "PrimaryPhone": {
-//     //             "FreeFormNumber": "(555) 555-5555"
-//     //         },
-//     //         "CompanyName": "King Groceries",
-//     //         "BillAddr": {
-//     //             "CountrySubDivisionCode": "CA",
-//     //             "City": "Mountain View",
-//     //             "PostalCode": "94042",
-//     //             "Line1": "123 Main Street",
-//     //             "Country": "USA"
-//     //         },
-//     //         "GivenName": "James"
-//     //     }
-//     // })
-//
-//     const response = await QuickBooksService.select(oauthClient, {
-//         from: 'Account',
-//         select: ['Name', 'AccountType', 'AccountSubType'],
-//         where: {
-//             AccountType: "Cost of Goods Sold"
-//         }
-//     });
-//     console.log('response => ')
-//     console.dir(response.getJson(), { depth: 10 })
-//     // const account = await QuickBooksService.Account.create(oauthClient, {
-//     //     "Name": "MyJobs_test_2",
-//     //     "AccountType": "Accounts Receivable"
-//     // })
-//     // console.log('account => ', account)
-// })()
 
 module.exports = QuickBooksService
