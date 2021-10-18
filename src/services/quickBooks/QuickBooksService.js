@@ -205,8 +205,6 @@ const QuickBooksService = (() => {
             async function actualizeTokens(oauthClient) {
                 if(!oauthClient.isAccessTokenValid()) {
                     const authResponse = await oauthClient.refresh();
-                    const authTokens = JSON.stringify(authResponse.getJson(), null, 2);
-                    console.debug('TRACE auth token\n', authTokens)
 
                     return {
                         ...authResponse.getJson(),
