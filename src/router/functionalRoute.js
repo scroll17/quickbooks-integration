@@ -1,6 +1,7 @@
 // external modules
 const _ = require('lodash')
 const express = require('express');
+const Joi = require('joi');
 // services
 const QuickBooksService = require('../services/quickBooks/QuickBooksService')
 // db
@@ -321,6 +322,68 @@ router.post('/approve-payout', async (req, res) => {
     return res
         .contentType('text')
         .send(JSON.stringify(user, null, 2))
+})
+
+router.post('/create-phase', async (req, res) => {
+    console.info('POST /functional/create-phase')
+    console.debug('TRACE req.body', req.body)
+
+    const { value, error } = Joi
+        .object({
+            name: Joi
+                .string()
+                .required(),
+            tasks: Joi
+                .array()
+                .items(
+                    Joi.object({
+                        name: Joi.string().required(),
+                        cost: Joi.number().required()
+                    })
+                )
+                .required()
+        })
+        .validate(req.body);
+    if(error) {
+        throw new Error(error.message)
+    }
+
+    const newPhase = value;
+    const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user);
+
+    const currentProject = user.CurrentProject;
+    const incomeAccount = user.Accounts.Income;
+    const expenseAccount = user.Accounts.Expense;
+
+    const address = _.get(_.split(currentProject.name, '/'), 0);
+
+    const phases = user.CurrentProject.Estimate.phases;
+    if(_.find(phases, { name: newPhase.name })) {
+        throw new Error(`Phases with passed name already exist`)
+    }
+
+    console.log('START CREATE ITEM FOR NEW PHASE')
+    const item = await QuickBooksService.Item.create(oauthClient, {
+        name: newPhase.name,
+        contractAddress: address,
+        incomeAccount,
+        expenseAccount,
+        tasks: newPhase.tasks
+    })
+    console.debug('ITEM CREATED');
+    console.debug('TRACE ITEM:')
+    console.dir(item, { depth: 10 })
+
+    newPhase.Item = item;
+    phases.push(newPhase);
+
+    await db.write();
+    console.log('DB: SAVED');
+    console.log('')
+
+    return res
+        .contentType('text')
+        .send(JSON.stringify(phases, null, 2))
 })
 
 module.exports = router;
