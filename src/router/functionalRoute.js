@@ -228,7 +228,6 @@ router.post('/request-payout', async (req, res) => {
             error: 'phase name in body not exist!'
         })
     }
-    console.debug('phaseName =', phaseName)
 
     const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
@@ -278,7 +277,6 @@ router.post('/approve-payout', async (req, res) => {
             error: 'phase name in body not exist!'
         })
     }
-    console.debug('phaseName =', phaseName)
 
     const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user)
 
@@ -365,7 +363,7 @@ router.post('/create-phase', async (req, res) => {
         throw new Error(`Phases with passed name already exist`)
     }
 
-    console.log('START CREATE ITEM FOR NEW PHASE')
+    console.debug('START CREATE ITEM FOR NEW PHASE')
     const item = await QuickBooksService.Item.create(oauthClient, {
         name: newPhase.name,
         contractAddress: address,
@@ -416,7 +414,6 @@ router.put('/update-phase', async (req, res) => {
     let updatedPhase = value;
     const oauthClient = await QuickBooksService.getUpToDateClient(user.tokens, db, user);
 
-    const currentProject = user.CurrentProject;
     const phases = user.CurrentProject.Estimate.phases;
 
     const oldPhaseIndex = _.findIndex(phases, { name: updatedPhase.name });
@@ -436,7 +433,7 @@ router.put('/update-phase', async (req, res) => {
         ...updatedPhase
     };
 
-    console.log('START UPDATE ITEM')
+    console.debug('START UPDATE ITEM')
     const item = await QuickBooksService.Item.update(oauthClient, {
         itemId: updatedPhase.Item.Id,
         tasks: updatedPhase.tasks
@@ -451,9 +448,9 @@ router.put('/update-phase', async (req, res) => {
     console.log('DB: SAVED');
 
     if(updatedPhase.Invoice) {
-        console.log('PHASE HAVE INVOICE')
+        console.debug('PHASE HAVE INVOICE')
 
-        console.log('START UPDATE INVOICE')
+        console.debug('START UPDATE INVOICE')
         const invoice = await QuickBooksService.Invoice.update(oauthClient, {
             invoiceId: updatedPhase.Invoice.Id,
             phaseAmount: _.sumBy(updatedPhase.tasks, t => t.cost)
@@ -467,6 +464,7 @@ router.put('/update-phase', async (req, res) => {
         await db.write();
         console.log('DB: SAVED');
     }
+    console.log('')
 
     return res
         .contentType('text')
