@@ -212,7 +212,10 @@ router.post('/approve-estimate', async (req, res) => {
 
     return res
         .contentType('text')
-        .send(JSON.stringify(user, null, 2))
+        .send(JSON.stringify({
+            customer,
+            phases: projectEstimate.phases
+        }, null, 2))
 })
 
 router.post('/request-payout', async (req, res) => {
@@ -262,7 +265,7 @@ router.post('/request-payout', async (req, res) => {
 
     return res
         .contentType('text')
-        .send(JSON.stringify(user, null, 2))
+        .send(JSON.stringify({ phase }, null, 2))
 })
 
 router.post('/approve-payout', async (req, res) => {
@@ -321,7 +324,7 @@ router.post('/approve-payout', async (req, res) => {
 
     return res
         .contentType('text')
-        .send(JSON.stringify(user, null, 2))
+        .send(JSON.stringify({ phase }, null, 2))
 })
 
 router.post('/create-phase', async (req, res) => {
@@ -383,7 +386,7 @@ router.post('/create-phase', async (req, res) => {
 
     return res
         .contentType('text')
-        .send(JSON.stringify(phases, null, 2))
+        .send(JSON.stringify({ phase: newPhase }, null, 2))
 })
 
 router.put('/update-phase', async (req, res) => {
@@ -467,7 +470,7 @@ router.put('/update-phase', async (req, res) => {
 
     return res
         .contentType('text')
-        .send(JSON.stringify(user, null, 2))
+        .send(JSON.stringify({ updatedPhase }, null, 2))
 })
 
 module.exports = router;
