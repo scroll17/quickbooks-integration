@@ -57,7 +57,7 @@
         "Owner": {
           "username": "test username",
           "email": "test@gmail.com",
-          "firstName": "Owner",
+          "firstName": "Pro",
           "lastName": "User",
           "phone": "(235) 235-2355"
         },
@@ -188,6 +188,174 @@
                 "DeliveryInfo": {
                   "DeliveryType": "Email"
                 }
+              },
+              "Payment": {
+                "CustomerRef": {
+                  "value": "59",
+                  "name": "test username"
+                },
+                "DepositToAccountRef": {
+                  "value": "4"
+                },
+                "TotalAmt": 220,
+                "UnappliedAmt": 0,
+                "ProcessPayment": false,
+                "domain": "QBO",
+                "sparse": false,
+                "Id": "147",
+                "SyncToken": "0",
+                "MetaData": {
+                  "CreateTime": "2021-10-18T02:33:15-07:00",
+                  "LastUpdatedTime": "2021-10-18T02:33:15-07:00"
+                },
+                "TxnDate": "2021-10-19",
+                "CurrencyRef": {
+                  "value": "USD",
+                  "name": "United States Dollar"
+                },
+                "Line": [
+                  {
+                    "Amount": 220,
+                    "LinkedTxn": [
+                      {
+                        "TxnId": "146",
+                        "TxnType": "Invoice"
+                      }
+                    ],
+                    "LineEx": {
+                      "any": [
+                        {
+                          "name": "{http://schema.intuit.com/finance/v3}NameValue",
+                          "declaredType": "com.intuit.schema.finance.v3.NameValue",
+                          "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                          "value": {
+                            "Name": "txnId",
+                            "Value": "146"
+                          },
+                          "nil": false,
+                          "globalScope": true,
+                          "typeSubstituted": false
+                        },
+                        {
+                          "name": "{http://schema.intuit.com/finance/v3}NameValue",
+                          "declaredType": "com.intuit.schema.finance.v3.NameValue",
+                          "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                          "value": {
+                            "Name": "txnOpenBalance",
+                            "Value": "220.00"
+                          },
+                          "nil": false,
+                          "globalScope": true,
+                          "typeSubstituted": false
+                        },
+                        {
+                          "name": "{http://schema.intuit.com/finance/v3}NameValue",
+                          "declaredType": "com.intuit.schema.finance.v3.NameValue",
+                          "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                          "value": {
+                            "Name": "txnReferenceNumber",
+                            "Value": "1038"
+                          },
+                          "nil": false,
+                          "globalScope": true,
+                          "typeSubstituted": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "UpdatedInvoice": {
+                "AllowIPNPayment": false,
+                "AllowOnlinePayment": false,
+                "AllowOnlineCreditCardPayment": false,
+                "AllowOnlineACHPayment": false,
+                "InvoiceLink": "https://developer.intuit.com/comingSoonview/scs-v1-52137baf7dba4365bfd511cc549e4c0fbac6c1e99c80477b9c0d1c0c181ebf0147786867e851419292fcc2b48121372a?locale=en_US&cta=v3invoicelink",
+                "domain": "QBO",
+                "sparse": false,
+                "Id": "146",
+                "SyncToken": "1",
+                "MetaData": {
+                  "CreateTime": "2021-10-12T08:21:26-07:00",
+                  "LastUpdatedTime": "2021-10-18T02:33:16-07:00"
+                },
+                "CustomField": [
+                  {
+                    "DefinitionId": "1",
+                    "Name": "Crew #",
+                    "Type": "StringType"
+                  }
+                ],
+                "DocNumber": "1038",
+                "TxnDate": "2021-10-12",
+                "CurrencyRef": {
+                  "value": "USD",
+                  "name": "United States Dollar"
+                },
+                "LinkedTxn": [
+                  {
+                    "TxnId": "147",
+                    "TxnType": "Payment"
+                  }
+                ],
+                "Line": [
+                  {
+                    "Id": "1",
+                    "LineNum": 1,
+                    "Description": "Pay for phase-1",
+                    "Amount": 220,
+                    "DetailType": "SalesItemLineDetail",
+                    "SalesItemLineDetail": {
+                      "ItemRef": {
+                        "value": "20",
+                        "name": "phase-1 - New York"
+                      },
+                      "ItemAccountRef": {
+                        "value": "45",
+                        "name": "Landscaping Services"
+                      },
+                      "TaxCodeRef": {
+                        "value": "NON"
+                      }
+                    }
+                  },
+                  {
+                    "Amount": 220,
+                    "DetailType": "SubTotalLineDetail",
+                    "SubTotalLineDetail": {}
+                  }
+                ],
+                "TxnTaxDetail": {
+                  "TotalTax": 0
+                },
+                "CustomerRef": {
+                  "value": "59",
+                  "name": "test username"
+                },
+                "BillAddr": {
+                  "Id": "97",
+                  "City": "New York",
+                  "Country": "USA",
+                  "CountrySubDivisionCode": "Quinby",
+                  "PostalCode": "23423"
+                },
+                "ShipFromAddr": {
+                  "Id": "98",
+                  "Line1": "123 Sierra Way",
+                  "Line2": "San Pablo, CA  87999"
+                },
+                "DueDate": "2021-11-11",
+                "TotalAmt": 220,
+                "ApplyTaxAfterDiscount": false,
+                "PrintStatus": "NeedToPrint",
+                "EmailStatus": "NeedToSend",
+                "BillEmail": {
+                  "Address": "test@gmail.com"
+                },
+                "Balance": 0,
+                "DeliveryInfo": {
+                  "DeliveryType": "Email"
+                }
               }
             },
             {
@@ -227,6 +395,309 @@
                 "MetaData": {
                   "CreateTime": "2021-10-12T04:34:46-07:00",
                   "LastUpdatedTime": "2021-10-12T04:34:46-07:00"
+                }
+              }
+            },
+            {
+              "name": "phase-0-1",
+              "tasks": [
+                {
+                  "name": "p3. t.1",
+                  "cost": 500
+                },
+                {
+                  "name": "p3. t.2",
+                  "cost": 300
+                },
+                {
+                  "name": "p3. t.3",
+                  "cost": 100
+                },
+                {
+                  "name": "p3. t.4",
+                  "cost": 50
+                }
+              ],
+              "Item": {
+                "Name": "phase-0-1 - New York, Quinby, VA 23423",
+                "Description": "[1]: p3. t.1;\n[2]: p3. t.2;\n[3]: p3. t.3;\n[4]: p3. t.4",
+                "Active": true,
+                "FullyQualifiedName": "phase-0-1 - New York, Quinby, VA 23423",
+                "Taxable": false,
+                "UnitPrice": 950,
+                "Type": "Service",
+                "IncomeAccountRef": {
+                  "value": "45",
+                  "name": "Landscaping Services"
+                },
+                "PurchaseCost": 0,
+                "ExpenseAccountRef": {
+                  "value": "80",
+                  "name": "Cost of Goods Sold"
+                },
+                "TrackQtyOnHand": false,
+                "domain": "QBO",
+                "sparse": false,
+                "Id": "25",
+                "SyncToken": "2",
+                "MetaData": {
+                  "CreateTime": "2021-10-18T06:10:07-07:00",
+                  "LastUpdatedTime": "2021-10-18T06:34:23-07:00"
+                }
+              },
+              "Invoice": {
+                "AllowIPNPayment": false,
+                "AllowOnlinePayment": false,
+                "AllowOnlineCreditCardPayment": false,
+                "AllowOnlineACHPayment": false,
+                "InvoiceLink": "https://developer.intuit.com/comingSoonview/scs-v1-ce62ead6c6f1484294ca81f898ee941f93a8167fba7747fca8f44a3a3896dddcc35f685892614f78abce7b51a85edec1?locale=en_US&cta=v3invoicelink",
+                "domain": "QBO",
+                "sparse": false,
+                "Id": "151",
+                "SyncToken": "1",
+                "MetaData": {
+                  "CreateTime": "2021-10-18T06:32:50-07:00",
+                  "LastUpdatedTime": "2021-10-18T06:34:25-07:00"
+                },
+                "CustomField": [
+                  {
+                    "DefinitionId": "1",
+                    "Name": "Crew #",
+                    "Type": "StringType"
+                  }
+                ],
+                "DocNumber": "1042",
+                "TxnDate": "2021-10-18",
+                "CurrencyRef": {
+                  "value": "USD",
+                  "name": "United States Dollar"
+                },
+                "LinkedTxn": [],
+                "Line": [
+                  {
+                    "Id": "1",
+                    "LineNum": 1,
+                    "Description": "Pay for phase-0-1",
+                    "Amount": 950,
+                    "DetailType": "SalesItemLineDetail",
+                    "SalesItemLineDetail": {
+                      "ItemRef": {
+                        "value": "25",
+                        "name": "phase-0-1 - New York, Quinby, VA 23423"
+                      },
+                      "ItemAccountRef": {
+                        "value": "45",
+                        "name": "Landscaping Services"
+                      },
+                      "TaxCodeRef": {
+                        "value": "NON"
+                      }
+                    }
+                  },
+                  {
+                    "Amount": 950,
+                    "DetailType": "SubTotalLineDetail",
+                    "SubTotalLineDetail": {}
+                  }
+                ],
+                "TxnTaxDetail": {
+                  "TotalTax": 0
+                },
+                "CustomerRef": {
+                  "value": "59",
+                  "name": "test username"
+                },
+                "BillAddr": {
+                  "Id": "97",
+                  "City": "New York",
+                  "Country": "USA",
+                  "CountrySubDivisionCode": "Quinby",
+                  "PostalCode": "23423"
+                },
+                "ShipFromAddr": {
+                  "Id": "102",
+                  "Line1": "123 Sierra Way",
+                  "Line2": "San Pablo, CA  87999 US"
+                },
+                "DueDate": "2021-11-17",
+                "TotalAmt": 950,
+                "ApplyTaxAfterDiscount": false,
+                "PrintStatus": "NeedToPrint",
+                "EmailStatus": "NeedToSend",
+                "BillEmail": {
+                  "Address": "test@gmail.com"
+                },
+                "Balance": 950,
+                "DeliveryInfo": {
+                  "DeliveryType": "Email"
+                }
+              },
+              "Payment": {
+                "CustomerRef": {
+                  "value": "59",
+                  "name": "test username"
+                },
+                "DepositToAccountRef": {
+                  "value": "4"
+                },
+                "TotalAmt": 950,
+                "UnappliedAmt": 0,
+                "ProcessPayment": false,
+                "domain": "QBO",
+                "sparse": false,
+                "Id": "152",
+                "SyncToken": "0",
+                "MetaData": {
+                  "CreateTime": "2021-10-18T06:36:42-07:00",
+                  "LastUpdatedTime": "2021-10-18T06:36:42-07:00"
+                },
+                "TxnDate": "2021-10-19",
+                "CurrencyRef": {
+                  "value": "USD",
+                  "name": "United States Dollar"
+                },
+                "Line": [
+                  {
+                    "Amount": 950,
+                    "LinkedTxn": [
+                      {
+                        "TxnId": "151",
+                        "TxnType": "Invoice"
+                      }
+                    ],
+                    "LineEx": {
+                      "any": [
+                        {
+                          "name": "{http://schema.intuit.com/finance/v3}NameValue",
+                          "declaredType": "com.intuit.schema.finance.v3.NameValue",
+                          "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                          "value": {
+                            "Name": "txnId",
+                            "Value": "151"
+                          },
+                          "nil": false,
+                          "globalScope": true,
+                          "typeSubstituted": false
+                        },
+                        {
+                          "name": "{http://schema.intuit.com/finance/v3}NameValue",
+                          "declaredType": "com.intuit.schema.finance.v3.NameValue",
+                          "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                          "value": {
+                            "Name": "txnOpenBalance",
+                            "Value": "950.00"
+                          },
+                          "nil": false,
+                          "globalScope": true,
+                          "typeSubstituted": false
+                        },
+                        {
+                          "name": "{http://schema.intuit.com/finance/v3}NameValue",
+                          "declaredType": "com.intuit.schema.finance.v3.NameValue",
+                          "scope": "javax.xml.bind.JAXBElement$GlobalScope",
+                          "value": {
+                            "Name": "txnReferenceNumber",
+                            "Value": "1042"
+                          },
+                          "nil": false,
+                          "globalScope": true,
+                          "typeSubstituted": false
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "UpdatedInvoice": {
+                "AllowIPNPayment": false,
+                "AllowOnlinePayment": false,
+                "AllowOnlineCreditCardPayment": false,
+                "AllowOnlineACHPayment": false,
+                "InvoiceLink": "https://developer.intuit.com/comingSoonview/scs-v1-ce62ead6c6f1484294ca81f898ee941f93a8167fba7747fca8f44a3a3896dddcc35f685892614f78abce7b51a85edec1?locale=en_US&cta=v3invoicelink",
+                "domain": "QBO",
+                "sparse": false,
+                "Id": "151",
+                "SyncToken": "2",
+                "MetaData": {
+                  "CreateTime": "2021-10-18T06:32:50-07:00",
+                  "LastUpdatedTime": "2021-10-18T06:36:42-07:00"
+                },
+                "CustomField": [
+                  {
+                    "DefinitionId": "1",
+                    "Name": "Crew #",
+                    "Type": "StringType"
+                  }
+                ],
+                "DocNumber": "1042",
+                "TxnDate": "2021-10-18",
+                "CurrencyRef": {
+                  "value": "USD",
+                  "name": "United States Dollar"
+                },
+                "LinkedTxn": [
+                  {
+                    "TxnId": "152",
+                    "TxnType": "Payment"
+                  }
+                ],
+                "Line": [
+                  {
+                    "Id": "1",
+                    "LineNum": 1,
+                    "Description": "Pay for phase-0-1",
+                    "Amount": 950,
+                    "DetailType": "SalesItemLineDetail",
+                    "SalesItemLineDetail": {
+                      "ItemRef": {
+                        "value": "25",
+                        "name": "phase-0-1 - New York, Quinby, VA 23423"
+                      },
+                      "ItemAccountRef": {
+                        "value": "45",
+                        "name": "Landscaping Services"
+                      },
+                      "TaxCodeRef": {
+                        "value": "NON"
+                      }
+                    }
+                  },
+                  {
+                    "Amount": 950,
+                    "DetailType": "SubTotalLineDetail",
+                    "SubTotalLineDetail": {}
+                  }
+                ],
+                "TxnTaxDetail": {
+                  "TotalTax": 0
+                },
+                "CustomerRef": {
+                  "value": "59",
+                  "name": "test username"
+                },
+                "BillAddr": {
+                  "Id": "97",
+                  "City": "New York",
+                  "Country": "USA",
+                  "CountrySubDivisionCode": "Quinby",
+                  "PostalCode": "23423"
+                },
+                "ShipFromAddr": {
+                  "Id": "102",
+                  "Line1": "123 Sierra Way",
+                  "Line2": "San Pablo, CA  87999 US"
+                },
+                "DueDate": "2021-11-17",
+                "TotalAmt": 950,
+                "ApplyTaxAfterDiscount": false,
+                "PrintStatus": "NeedToPrint",
+                "EmailStatus": "NeedToSend",
+                "BillEmail": {
+                  "Address": "test@gmail.com"
+                },
+                "Balance": 0,
+                "DeliveryInfo": {
+                  "DeliveryType": "Email"
                 }
               }
             }
