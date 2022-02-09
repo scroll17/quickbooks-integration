@@ -23,18 +23,25 @@
  *      - Wait "Client paid" from QuickBooks after "Client approved payment"
  *
  *   Updated Plan:
- *      1. Pro connect QuickBooks Account (Income type)
- *      2. When "Estimate Approve" we create Customer(if not exist) for selected QuickBooks Account by current Project
+ *      +1. Pro connect QuickBooks Account (Income type)
+ *      +2. When "Estimate Approve" we create Customer(if not exist) for selected QuickBooks Account by current Project
  *        2.1. Create by each Phase Item in QuickBooks and in description write list tasks
  *        2.2. If Item with passed name exist - create Item with Name - Contract Name
- *      3. When Pro request Payout - need create Invoice (QuickBooks)
- *      4. Client approve payment / Client paid:
+ *      +3. When Pro request Payout - need create Invoice (QuickBooks)
+ *      -4. Client approve payment / Client paid:
  *          For Subscription Plan:
- *            4.1. By webhook we wait notification about Invoice paid (Invoice.Balance = 0.0) and then make Payment Release as succeeded
- *            4.2. We block Mutation releaseFundPhase (and any release*)
+ *            -4.1. By webhook we wait notification about Invoice paid (Invoice.Balance = 0.0) and then make Payment Release as succeeded
+ *            +4.2. We block Mutation releaseFundPhase
  *          For default plan:
- *            4.2. In QuickBooks we make Invoice as paid
- *      5. When Approve Change Order in short - we need create or update Item cost / description
+ *            +4.2. In QuickBooks we make Invoice as paid
+ *      +5. When Approve Change Order in short - we need create or update Item cost / description
+ *      -6. Implement a webhook:
+ *          6.1. Wait Invoice update (for check is paid and "Balance"=0)
+ *          +6.2. Wait Item update (updated Name)
+ *          6.3. Wait Customer update (update Display Name)
+ *          6.4. Wait Account update (update Name)
+ *      N:
+ *          + need job for check refresh token expires (if <= week then need refresh)
  *
  *  Helpful links:
  *      https://help.developer.intuit.com/s/question/0D5G000004Dk6N0/can-you-use-the-api-to-mark-an-invoice-as-paid
